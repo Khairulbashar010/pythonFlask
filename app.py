@@ -21,6 +21,11 @@ db = client[os.getenv("DB_NAME")]
 users_collection = db["users"]
 templates_collection = db["templates"]
 
+@app.route('/', methods=["GET"])
+def index():
+	return "App running"
+
+
 @app.route('/register', methods=["POST"])
 @cross_origin()
 def register():
