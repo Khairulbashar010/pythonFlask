@@ -73,6 +73,21 @@ def getALLTemplates():
 		return jsonify({'msg': 'Something went wrong'}), 500
 
 
+@app.route("/template/<id>", methods=["GET"])
+@jwt_required()
+@cross_origin()
+def getSingleTemplate(id):
+	try:
+		template = templates_collection.find_one({'_id': ObjectId(id), "user_id": get_jwt_identity() })
+		if template:
+			template['_id'] = str(template['_id'])
+			del template['user_id']
+			return jsonify({'msg': 'Template fetched successfully', 'data':template}), 200
+		return jsonify({'msg': 'Template not found'}), 200
+	except Exception as ex:
+		return jsonify({'msg': 'Something went wrong'}), 500
+
+
 @app.route("/template", methods=["POST"])
 @jwt_required()
 @cross_origin()
@@ -102,7 +117,7 @@ def updateTemplate(id):
         "body": request_data["body"],
     }
 	try:
-		template = templates_collection.update_one({ '_id': ObjectId(id) }, {"$set": update_data})
+		template = templates_collection.update_one({ '_id': ObjectId(id), 'user_id': get_jwt_identity() }, {"$set": update_data})
 		if template.modified_count == 1:
 			return jsonify({'msg': 'Template updated successfully'}), 200
 		return jsonify({'msg': 'Nothing to update'}), 200
@@ -114,7 +129,7 @@ def updateTemplate(id):
 @cross_origin()
 def deleteTemplate(id):
 	try:
-		template = templates_collection.delete_one({ '_id': ObjectId(id) })
+		template = templates_collection.delete_one({ '_id': ObjectId(id), 'user_id': get_jwt_identity() })
 		if template.deleted_count == 1:
 			return jsonify({'msg': 'Template deleted successfully'}), 200
 		return jsonify({'msg': 'Template not found'}), 200
